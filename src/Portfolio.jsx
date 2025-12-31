@@ -86,7 +86,7 @@ const Portfolio = () => {
       ]
     },
     {
-      company: "安徽兆尹信息科技 (兴业数金外派)",
+      company: "兴业数金外派",
       role: "UI设计师",
       period: "2024.02 - 2025.03",
       description: "负责核心金融B端产品的用户体验与界面规范。",
@@ -200,8 +200,60 @@ const Portfolio = () => {
 
   return (
     <div className={`${isLight ? 'bg-[#FAF7F2] text-neutral-900' : 'bg-neutral-900 text-white'} min-h-screen font-sans selection:bg-indigo-500 selection:text-white`}>
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? (isLight ? 'bg-white/80 backdrop-blur-md border-b border-neutral-200 py-3' : 'bg-neutral-900/80 backdrop-blur-md border-b border-white/10 py-3') : 'bg-transparent py-6'}`}>
-        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
+      {/* SVG Filter for Liquid Glass refraction effect */}
+      <svg className="absolute w-0 h-0">
+        <defs>
+          <filter id="liquid-glass" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
+
+      <nav className="fixed w-full z-50 py-4 px-4">
+        <div className={`relative max-w-4xl mx-auto px-6 py-3 flex justify-between items-center rounded-[20px] transition-all duration-500 overflow-hidden ${
+          scrolled ? 'opacity-100' : 'opacity-100'
+        }`}
+        style={{
+          background: scrolled
+            ? (isLight
+                ? 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%)'
+                : 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)')
+            : 'transparent',
+          backdropFilter: scrolled ? 'blur(40px) saturate(180%)' : 'none',
+          WebkitBackdropFilter: scrolled ? 'blur(40px) saturate(180%)' : 'none',
+          border: scrolled
+            ? (isLight ? '1px solid rgba(255,255,255,0.6)' : '1px solid rgba(255,255,255,0.18)')
+            : 'none',
+          boxShadow: scrolled
+            ? (isLight
+                ? '0 8px 32px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(0,0,0,0.05), 0 0 0 1px rgba(255,255,255,0.2)'
+                : '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)')
+            : 'none',
+        }}>
+          {/* Specular highlight - top edge glow */}
+          {scrolled && (
+            <div
+              className="absolute inset-x-0 top-0 h-[1px] pointer-events-none"
+              style={{
+                background: isLight
+                  ? 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 20%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.9) 80%, transparent 100%)'
+                  : 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.3) 80%, transparent 100%)',
+              }}
+            />
+          )}
+          {/* Inner glow for 3D depth */}
+          {scrolled && (
+            <div
+              className="absolute inset-0 rounded-[20px] pointer-events-none"
+              style={{
+                background: isLight
+                  ? 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.5) 0%, transparent 60%)'
+                  : 'radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.1) 0%, transparent 60%)',
+              }}
+            />
+          )}
           <div className="text-2xl font-bold tracking-tighter flex items-center gap-2">
             <img src="/avatar.png" alt="logo" className="h-8 w-8 object-cover rounded-lg" />
             <span>Selected Works<span className="text-indigo-500">.</span></span>
@@ -213,7 +265,7 @@ const Portfolio = () => {
             <a href="#projects" className={`${isLight ? 'hover:text-neutral-900' : 'hover:text-white'} transition-colors`}>精选作品</a>
           </div>
           <div className="hidden md:flex">
-            <button onClick={() => window.location.href = `mailto:${profile.email}`} className={`${isLight ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-white text-neutral-950 hover:bg-indigo-50'} px-5 py-2 rounded-full font-semibold text-sm transition-colors flex items-center gap-2`}>
+            <button onClick={() => window.location.href = `mailto:${profile.email}`} className={`${isLight ? 'bg-indigo-500/80 text-white hover:bg-indigo-500 shadow-[0_4px_16px_rgba(99,102,241,0.3)]' : 'bg-white/90 text-neutral-950 hover:bg-white shadow-[0_4px_16px_rgba(255,255,255,0.2)]'} px-5 py-2 rounded-full font-semibold text-sm transition-all duration-300 flex items-center gap-2 backdrop-blur-sm`}>
               <Phone size={16} /> 联系我
             </button>
           </div>
@@ -307,7 +359,7 @@ const Portfolio = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl font-bold mb-2">核心技能栈</h2>
+              <h2 className="text-3xl font-bold mb-2">核心技能</h2>
               <p className="text-neutral-400">工具只是手段，解决问题才是核心</p>
             </div>
             <div className="flex gap-2 mt-4 md:mt-0">
@@ -352,7 +404,7 @@ const Portfolio = () => {
             <div className={`md:col-span-4 rounded-2xl p-8 border flex flex-col md:flex-row items-center justify-between gap-6 ${isLight ? 'bg-gradient-to-r from-[#FAF7F2] to-neutral-100 border-neutral-200' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 border-white/5'}`}>
               <div>
                 <h3 className={`text-xl font-bold mb-2 ${isLight ? 'text-neutral-900' : 'text-white'}`}>不仅是 UI，更是全链路设计师</h3>
-                <p className="text-neutral-400 max-w-2xl">从需求分析、交互原型(Axure)到高保真视觉(Figma)，再到动效演示与开发交付。无论是严谨的金融B端系统，还是二次元风格的C端运营物料，我都能精准驾驭。</p>
+                <p className="text-neutral-400 max-w-2xl">从抽象的逻辑构思到具象的视觉呈现，我专注于打通设计的每一个环节。 拥有 B 端系统的架构思维，同时具备 C 端与二次元领域的敏锐审美，为不同类型的产品提供从 0 到 1 的全案设计支持。</p>
               </div>
               <div className="shrink-0">
                 <button onClick={() => setShowSkillsModal(true)} className={`${isLight ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-900' : 'bg-white/10 hover:bg-white/20 text-white'} px-6 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2`}>查看详细技能树 <BookOpen size={16} /></button>
@@ -364,11 +416,11 @@ const Portfolio = () => {
 
       <section id="experience" className={`py-20 px-6 ${isLight ? 'bg-transparent' : 'bg-neutral-900'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">职业旅程</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">工作经历</h2>
           <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-indigo-500 before:to-transparent">
             {experiences.map((exp, index) => (
               <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-neutral-950 bg-indigo-600 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-[0_0_15px_rgba(79,70,229,0.5)] z-10">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 ${isLight ? 'border-[#FAF7F2] shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'border-neutral-950 shadow-[0_0_15px_rgba(79,70,229,0.5)]'} bg-indigo-600 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10`}>
                   <Briefcase size={16} className="text-white" />
                 </div>
                 <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 rounded-xl border shadow-lg hover:border-indigo-500/30 transition-all duration-300 hover:-translate-y-1 ${surface}`}>
