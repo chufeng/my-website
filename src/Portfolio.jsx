@@ -28,6 +28,9 @@ import {
   Star
 } from 'lucide-react';
 
+// API 配置 - 生产环境改成你的服务器地址
+const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+
 const Portfolio = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,6 +38,7 @@ const Portfolio = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [currentProjectImage, setCurrentProjectImage] = useState('');
   const [theme, setTheme] = useState('dark');
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +56,38 @@ const Portfolio = () => {
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // 从 API 加载作品数据
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/projects`);
+        if (res.ok) {
+          const data = await res.json();
+          // 将 API 数据转换为前端格式
+          const formattedProjects = data.map(p => ({
+            title: p.title,
+            category: p.category,
+            color: getCategoryColor(p.category),
+            desc: p.description,
+            imageUrl: p.image
+          }));
+          setProjects(formattedProjects);
+        }
+      } catch (error) {
+        console.log('Using default projects data');
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  // 根据分类返回颜色
+  const getCategoryColor = (category) => {
+    if (category.includes('B端') || category.includes('移动')) return 'from-indigo-600 to-purple-500';
+    if (category.includes('数据') || category.includes('可视化')) return 'from-blue-600 to-cyan-400';
+    if (category.includes('品牌') || category.includes('运营') || category.includes('IP')) return 'from-amber-400 to-orange-500';
+    return 'from-pink-500 to-rose-400';
+  };
 
   const profile = {
     name: "王越",
@@ -75,18 +111,18 @@ const Portfolio = () => {
 
   const experiences = [
     {
-      company: "自由设计师",
+      company: "平面设计师",
       role: "电商及展会视觉设计",
       period: "2025.04 - 至今",
       description: "专注于高视觉冲击力的品牌物料与IP衍生品设计。",
       achievements: [
-        "Bilibili World & Comic 106 大型展会全套物料设计",
-        "原创IP周边（立牌、团扇、挂画）落地，销量显著",
-        "电商店铺整体视觉升级，提升点击率与品牌一致性"
+        "IP衍生品开发与出版物设计",
+        "线下展会与摊位视觉设计",
+        "电商平台视觉升级"
       ]
     },
     {
-      company: "兴业数金外派",
+      company: "兴业银行数字金融服务",
       role: "UI设计师",
       period: "2024.02 - 2025.03",
       description: "负责核心金融B端产品的用户体验与界面规范。",
@@ -109,85 +145,16 @@ const Portfolio = () => {
     }
   ];
 
-  const projects = [
-    {
-      title: "兴安云智能移动端",
-      category: "B端系统 / APP",
-      color: "from-indigo-600 to-purple-500",
-      desc: "金融行业移动端解决方案，聚焦风控与运营流程，强调高可用与清晰的信息架构。",
-      imageUrl: "/兴安云智能移动端.jpg"
-    },
-    {
-      title: "兴安云智能移动端（二）",
-      category: "B端系统 / APP",
-      color: "from-indigo-600 to-purple-500",
-      desc: "同系列方案在不同业务场景下的界面适配与组件复用，保证一致性与效率。",
-      imageUrl: "/兴安云智能移动端2.jpg"
-    },
-    {
-      title: "BW 漫展主视觉",
-      category: "品牌 / 平面",
-      color: "from-pink-500 to-rose-400",
-      desc: "极具二次元风格的展位与宣传物料设计，有效吸引目标受众，提升品牌曝光。",
-      imageUrl: null
-    },
-    {
-      title: "金智云鼎 APP",
-      category: "B端系统 / APP",
-      color: "from-indigo-600 to-purple-500",
-      desc: "面向企业客户的业务管理与数据展示端，兼顾操作效率与品牌识别度。",
-      imageUrl: "/金智云鼎APP.jpg"
-    },
-    {
-      title: "金智云鼎 APP（二）",
-      category: "B端系统 / APP",
-      color: "from-indigo-600 to-purple-500",
-      desc: "交互细节与状态设计的深化，覆盖复杂流程与异常场景，提升可用性。",
-      imageUrl: "/金智云鼎APP2.jpg"
-    },
-    {
-      title: "可视化大屏",
-      category: "数据可视化",
-      color: "from-blue-600 to-cyan-400",
-      desc: "针对运营与风控的实时数据驾驶舱，以视觉层级与图表选择优化洞察效率。",
-      imageUrl: "/可视化大屏.jpg"
-    },
-    {
-      title: "可视化大屏（二）",
-      category: "数据可视化",
-      color: "from-blue-600 to-cyan-400",
-      desc: "不同分辨率与设备的适配方案，确保在展会与指挥中心均有良好呈现。",
-      imageUrl: "/可视化大屏2.jpg"
-    },
-    {
-      title: "数据中台",
-      category: "数据可视化",
-      color: "from-blue-600 to-cyan-400",
-      desc: "聚合多源数据的中台系统设计，强调模块化与可扩展的交互架构。",
-      imageUrl: "/数据中台.jpg"
-    },
-    {
-      title: "运营设计",
-      category: "品牌 / 平面",
-      color: "from-amber-400 to-orange-500",
-      desc: "围绕活动与转化目标的视觉物料，统一风格并强化关键信息的传达。",
-      imageUrl: "/运营设计.jpg"
-    },
-    {
-      title: "运营设计（二）",
-      category: "品牌 / 平面",
-      color: "from-amber-400 to-orange-500",
-      desc: "在不同渠道与版式上的延展应用，保证一致的品牌体验。",
-      imageUrl: "/运营设计2.jpg"
-    },
-    {
-      title: "产品设计 · 衣服",
-      category: "品牌 / 平面",
-      color: "from-amber-400 to-orange-500",
-      desc: "以角色与图形语言为核心的服饰产品设计，兼顾审美与量产落地。",
-      imageUrl: "/产品设计-衣服.png"
-    }
+  // 默认作品数据（API 未返回数据时使用）
+  const defaultProjects = [
+    { title: "兴安云智能移动端", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "金融行业移动端解决方案", imageUrl: "/兴安云智能移动端.jpg" },
+    { title: "金智云鼎 APP", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "面向企业客户的业务管理端", imageUrl: "/金智云鼎APP.jpg" },
+    { title: "可视化大屏", category: "数据可视化", color: "from-blue-600 to-cyan-400", desc: "实时数据驾驶舱", imageUrl: "/可视化大屏.jpg" },
+    { title: "运营设计", category: "品牌 / 平面", color: "from-amber-400 to-orange-500", desc: "活动与转化目标的视觉物料", imageUrl: "/运营设计.jpg" },
   ];
+
+  // 如果 API 没有返回数据，使用默认数据
+  const displayProjects = projects.length > 0 ? projects : defaultProjects;
 
   const openProjectModal = (imageUrl) => {
     setCurrentProjectImage(imageUrl);
@@ -300,7 +267,7 @@ const Portfolio = () => {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">创造有生命力的</span>
               <br/> 视觉体验
             </h1>
-            <p className="text-neutral-400 text-lg md:text-xl max-w-lg mb-8 leading-relaxed">
+            <p className="text-neutral-400 text-base md:text-lg max-w-lg mb-8 leading-relaxed">
               {profile.experience}资深多维设计师（Visual / UI Designer）。
               <br />拒绝单一维度的定义。深耕B端系统与C端产品体验，同时活跃于品牌电商及二次元文创领域。
               <br />擅长在严谨的交互逻辑中注入细腻的视觉情感，无论是一套庞大的后台系统，还是一件触动粉丝的周边小物，都能提供精准且富有生命力的设计方案。
@@ -452,7 +419,7 @@ const Portfolio = () => {
             <a href="https://satoshin.site" target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-sm">查看更多 <ArrowUpRight size={16}/></a>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
-            {projects.map((project, index) => {
+            {displayProjects.map((project, index) => {
               const hasImage = !!project.imageUrl;
               return (
                 <div

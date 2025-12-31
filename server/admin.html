@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品管理后台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-neutral-900 text-white min-h-screen">
+  <div id="app" class="max-w-6xl mx-auto p-6">
+    <!-- Login Form -->
+    <div id="loginSection" class="flex items-center justify-center min-h-screen">
+      <div class="glass rounded-2xl p-8 w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center">管理后台登录</h1>
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">用户名</label>
+            <input type="text" id="username" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500" placeholder="admin">
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">密码</label>
+            <input type="password" id="password" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500" placeholder="******">
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-semibold transition-colors">登录</button>
+          <p id="loginError" class="text-red-400 text-sm text-center hidden"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminSection" class="hidden">
+      <header class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold">作品管理</h1>
+        <div class="flex gap-4">
+          <button id="addBtn" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg font-semibold transition-colors">+ 添加作品</button>
+          <button id="logoutBtn" class="bg-white/10 hover:bg-white/20 px-6 py-2 rounded-lg transition-colors">退出</button>
+        </div>
+      </header>
+
+      <!-- Projects List -->
+      <div id="projectsList" class="grid gap-4"></div>
+
+      <!-- Modal -->
+      <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+          <h2 id="modalTitle" class="text-xl font-bold mb-6">添加作品</h2>
+          <form id="projectForm" class="space-y-4">
+            <input type="hidden" id="projectId">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-2">标题 *</label>
+                <input type="text" id="title" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-2">分类 *</label>
+                <select id="category" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+                  <option value="B端系统">B端系统</option>
+                  <option value="移动应用">移动应用</option>
+                  <option value="数据可视化">数据可视化</option>
+                  <option value="运营设计">运营设计</option>
+                  <option value="IP周边">IP周边</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-2">描述</label>
+              <textarea id="description" rows="3" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-2">标签 (逗号分隔)</label>
+                <input type="text" id="tags" placeholder="UI, 系统设计, B端" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-2">排序 (数字越小越靠前)</label>
+                <input type="number" id="sort_order" value="0" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-2">链接</label>
+              <input type="url" id="link" placeholder="https://..." class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-2">图片</label>
+              <input type="file" id="image" accept="image/*" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+              <div id="currentImage" class="mt-2 hidden">
+                <img id="previewImage" class="h-32 rounded-lg object-cover">
+              </div>
+            </div>
+            <div class="flex gap-4 pt-4">
+              <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-semibold transition-colors">保存</button>
+              <button type="button" id="cancelBtn" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-lg transition-colors">取消</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let token = localStorage.getItem('token');
+
+    // Elements
+    const loginSection = document.getElementById('loginSection');
+    const adminSection = document.getElementById('adminSection');
+    const loginForm = document.getElementById('loginForm');
+    const projectForm = document.getElementById('projectForm');
+    const projectsList = document.getElementById('projectsList');
+    const modal = document.getElementById('modal');
+
+    // Check auth on load
+    async function checkAuth() {
+      if (!token) return showLogin();
+      try {
+        const res = await fetch(`${API_BASE}/verify`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          showAdmin();
+          loadProjects();
+        } else {
+          showLogin();
+        }
+      } catch {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      loginSection.classList.remove('hidden');
+      adminSection.classList.add('hidden');
+    }
+
+    function showAdmin() {
+      loginSection.classList.add('hidden');
+      adminSection.classList.remove('hidden');
+    }
+
+    // Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          token = data.token;
+          localStorage.setItem('token', token);
+          showAdmin();
+          loadProjects();
+        } else {
+          document.getElementById('loginError').textContent = data.error || '登录失败';
+          document.getElementById('loginError').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      token = null;
+      showLogin();
+    });
+
+    // Load projects
+    async function loadProjects() {
+      try {
+        const res = await fetch(`${API_BASE}/projects`);
+        const projects = await res.json();
+
+        projectsList.innerHTML = projects.map(p => `
+          <div class="glass rounded-xl p-6 flex gap-6 items-center">
+            <img src="${p.image || 'https://via.placeholder.com/120'}" class="w-24 h-24 rounded-lg object-cover shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="font-bold text-lg">${p.title}</h3>
+                <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">${p.category}</span>
+              </div>
+              <p class="text-neutral-400 text-sm truncate">${p.description || '暂无描述'}</p>
+              <div class="flex gap-2 mt-2">
+                ${(p.tags || []).map(t => `<span class="text-xs bg-white/10 px-2 py-1 rounded">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <button onclick="editProject(${p.id})" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">编辑</button>
+              <button onclick="deleteProject(${p.id})" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors">删除</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Modal
+    function openModal(title = '添加作品') {
+      document.getElementById('modalTitle').textContent = title;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      projectForm.reset();
+      document.getElementById('projectId').value = '';
+      document.getElementById('currentImage').classList.add('hidden');
+    }
+
+    document.getElementById('addBtn').addEventListener('click', () => openModal('添加作品'));
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Edit project
+    async function editProject(id) {
+      try {
+        const res = await fetch(`${API_BASE}/projects/${id}`);
+        const project = await res.json();
+
+        document.getElementById('projectId').value = project.id;
+        document.getElementById('title').value = project.title;
+        document.getElementById('category').value = project.category;
+        document.getElementById('description').value = project.description || '';
+        document.getElementById('tags').value = (project.tags || []).join(', ');
+        document.getElementById('sort_order').value = project.sort_order || 0;
+        document.getElementById('link').value = project.link || '';
+
+        if (project.image) {
+          document.getElementById('previewImage').src = project.image;
+          document.getElementById('currentImage').classList.remove('hidden');
+        }
+
+        openModal('编辑作品');
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Delete project
+    async function deleteProject(id) {
+      if (!confirm('确定要删除这个作品吗？')) return;
+
+      try {
+        await fetch(`${API_BASE}/projects/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadProjects();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Save project
+    projectForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = document.getElementById('projectId').value;
+      const formData = new FormData();
+
+      formData.append('title', document.getElementById('title').value);
+      formData.append('category', document.getElementById('category').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('tags', JSON.stringify(document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean)));
+      formData.append('sort_order', document.getElementById('sort_order').value);
+      formData.append('link', document.getElementById('link').value);
+
+      const imageFile = document.getElementById('image').files[0];
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      try {
+        const url = id ? `${API_BASE}/projects/${id}` : `${API_BASE}/projects`;
+        const method = id ? 'PUT' : 'POST';
+
+        await fetch(url, {
+          method,
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+
+        closeModal();
+        loadProjects();
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    // Init
+    checkAuth();
+  </script>
+</body>
+</html>
