@@ -15,7 +15,6 @@ import {
   ChevronDown,
   Menu,
   X,
-  ArrowUpRight,
   Sparkles,
   Zap,
   BookOpen,
@@ -429,9 +428,8 @@ const Portfolio = () => {
 
       <section id="projects" className={`py-20 px-6 ${isLight ? 'bg-transparent' : 'bg-neutral-900'}`}>
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-end mb-12">
-            <h2 className="text-3xl font-bold">精选项目</h2>
-            <a href="https://satoshin.site" target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-sm">查看更多 <ArrowUpRight size={16}/></a>
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold">精选作品</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             {displayProjects.map((project, index) => {
