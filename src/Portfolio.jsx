@@ -293,20 +293,10 @@ const Portfolio = () => {
             </div>
           </div>
           <div className="relative hidden md:block">
-            <div className="relative z-10 w-full aspect-square rounded-2xl overflow-hidden bg-neutral-900 border border-white/10 shadow-2xl group">
+            <div className="relative z-10 w-full rounded-2xl overflow-hidden bg-neutral-900 border border-white/10 shadow-2xl group" style={{ aspectRatio: '454/550' }}>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="absolute top-12 left-12 right-12 bg-neutral-800 rounded-t-xl h-full shadow-2xl border border-white/5 transform translate-y-4 group-hover:translate-y-2 transition-transform duration-500 p-4">
-                <div className="flex gap-2 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
-                </div>
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="h-24 bg-neutral-700/50 rounded-lg animate-pulse"></div>
-                  <div className="col-span-2 h-24 bg-neutral-700/30 rounded-lg"></div>
-                </div>
-                <div className="h-4 w-1/3 bg-neutral-700/50 rounded mb-3"></div>
-                <div className="h-32 bg-neutral-700/20 rounded-lg border border-dashed border-white/10 flex items-center justify-center text-neutral-600 text-sm">UI Design System</div>
+              <div className="absolute inset-0 flex items-center justify-center transform translate-y-4 group-hover:translate-y-2 transition-transform duration-500">
+                <img src="/TopImage.jpg" alt="Design Preview" className="w-[90%] h-[90%] object-fill rounded-xl shadow-2xl border border-white/10" />
               </div>
               <div className="absolute -right-4 top-20 bg-neutral-800/90 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-xl transform rotate-3 group-hover:rotate-6 transition-transform">
                 <div className="flex items-center gap-3">
@@ -354,18 +344,18 @@ const Portfolio = () => {
                 ))}
               </div>
             </div>
-            <div className={`rounded-2xl p-6 border flex flex-col justify-between transition-colors ${surface}`}>
-              <div className="bg-blue-500/10 w-12 h-12 rounded-full flex items-center justify-center text-blue-400 mb-4"><Monitor /></div>
-              <div>
-                <div className={`text-4xl font-bold mb-1 ${isLight ? 'text-neutral-900' : 'text-white'}`}>10+</div>
-                <div className="text-neutral-400 text-sm">B端/SaaS系统项目交付</div>
+            <div className={`rounded-2xl overflow-hidden border transition-colors relative ${surface}`} style={{ aspectRatio: '270/378' }}>
+              <img src="/cell1.jpg" alt="B端系统" className="w-full h-full object-cover" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
+                <div className="text-4xl font-bold mb-1 text-white">100%</div>
+                <div className="text-white/80 text-sm">视觉包装和字体设计</div>
               </div>
             </div>
-            <div className={`rounded-2xl p-6 border flex flex-col justify-between transition-colors ${surface}`}>
-              <div className="bg-pink-500/10 w-12 h-12 rounded-full flex items-center justify-center text-pink-400 mb-4"><PenTool /></div>
-              <div>
-                <div className={`text-4xl font-bold mb-1 ${isLight ? 'text-neutral-900' : 'text-white'}`}>100%</div>
-                <div className="text-neutral-400 text-sm">视觉包装和字体设计</div>
+            <div className={`rounded-2xl overflow-hidden border transition-colors relative ${surface}`} style={{ aspectRatio: '270/378' }}>
+              <img src="/cell2.jpg" alt="视觉设计" className="w-full h-full object-cover" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
+                <div className="text-4xl font-bold mb-1 text-white">10+</div>
+                <div className="text-white/80 text-sm">B端/SaaS系统项目交付</div>
               </div>
             </div>
             <div className={`md:col-span-4 rounded-2xl p-8 border flex flex-col md:flex-row items-center justify-between gap-6 ${isLight ? 'bg-gradient-to-r from-[#FAF7F2] to-neutral-100 border-neutral-200' : 'bg-gradient-to-r from-neutral-900 to-neutral-800 border-white/5'}`}>
