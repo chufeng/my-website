@@ -18,7 +18,8 @@ echo "  2) 仅部署后端"
 echo "  3) 完整部署（前端 + 后端）"
 echo "  4) 首次部署（包含服务器初始化）"
 echo "  5) 修复服务器文件权限（图片/资源403时使用）"
-read -p "请输入选项 [1-5]: " choice
+echo "  6) 同步本地数据库作品到服务器"
+read -p "请输入选项 [1-6]: " choice
 
 deploy_frontend() {
     local fix_perms=${1:-true}
@@ -108,6 +109,15 @@ fix_server_permissions() {
     fi
 }
 
+sync_database() {
+    echo ""
+    echo "📦 同步本地数据库作品到服务器..."
+    echo "   （本地新增的作品会上传，已存在的会跳过）"
+    echo ""
+    cd server && node sync-to-server.js
+    cd ..
+}
+
 case $choice in
     1)
         deploy_frontend false
@@ -126,6 +136,9 @@ case $choice in
         ;;
     5)
         fix_server_permissions
+        ;;
+    6)
+        sync_database
         ;;
     *)
         echo "无效选项"

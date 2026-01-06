@@ -39,6 +39,7 @@ const Portfolio = () => {
   const [currentProjectImage, setCurrentProjectImage] = useState('');
   const [theme, setTheme] = useState('dark');
   const [projects, setProjects] = useState([]);
+  const [resumePath, setResumePath] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,6 +80,24 @@ const Portfolio = () => {
       }
     };
     fetchProjects();
+  }, []);
+
+  // 从 API 加载简历状态
+  useEffect(() => {
+    const fetchResume = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/resume`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.exists) {
+            setResumePath(data.path);
+          }
+        }
+      } catch (error) {
+        console.log('Resume not available');
+      }
+    };
+    fetchResume();
   }, []);
 
   // 根据分类返回颜色
@@ -276,9 +295,15 @@ const Portfolio = () => {
               <a href="#projects" className={`${isLight ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-white text-neutral-950 hover:bg-neutral-200'} px-8 py-3 rounded-full font-bold transition-transform hover:scale-105 flex items-center gap-2`}>
                 查看作品 <ChevronDown size={18} />
               </a>
-              <a href={profile.resumeLink} download="王越_UI视觉设计师_简历.pdf" className={`${isLight ? 'bg-transparent border border-neutral-300 text-neutral-900 hover:bg-neutral-50' : 'bg-transparent border border-white/20 text-white hover:bg-white/10'} px-8 py-3 rounded-full font-bold transition-colors flex items-center gap-2`}>
-                下载简历 <Download size={18} />
-              </a>
+              {resumePath ? (
+                <a href={resumePath} download="王越_UI视觉设计师_简历.pdf" className={`${isLight ? 'bg-transparent border border-neutral-300 text-neutral-900 hover:bg-neutral-50' : 'bg-transparent border border-white/20 text-white hover:bg-white/10'} px-8 py-3 rounded-full font-bold transition-colors flex items-center gap-2`}>
+                  下载简历 <Download size={18} />
+                </a>
+              ) : (
+                <span className={`${isLight ? 'bg-transparent border border-neutral-200 text-neutral-400' : 'bg-transparent border border-white/10 text-neutral-500'} px-8 py-3 rounded-full font-bold flex items-center gap-2 cursor-not-allowed`}>
+                  简历准备中 <Download size={18} />
+                </span>
+              )}
             </div>
             <div className="mt-12 flex items-center gap-8 text-neutral-500 text-sm">
               <div className="flex items-center gap-2">
@@ -428,7 +453,7 @@ const Portfolio = () => {
                     </div>
                   ) : (
                     <div className="h-64 w-full bg-gradient-to-br from-neutral-800 to-neutral-700 flex items-center justify-center">
-                      <span className="text-neutral-300 text-sm">BW 漫展主视觉（保留位置）</span>
+                      <span className="text-neutral-500 text-sm">暂无图片</span>
                     </div>
                   )}
                   <div className="p-6">

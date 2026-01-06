@@ -44,6 +44,26 @@
         </div>
       </header>
 
+      <!-- 简历管理 -->
+      <div class="glass rounded-xl p-6 mb-8">
+        <h2 class="text-lg font-bold mb-4">简历管理</h2>
+        <div class="flex flex-wrap items-center gap-4">
+          <div id="resumeStatus" class="flex items-center gap-2">
+            <span class="text-neutral-400">当前状态：</span>
+            <span id="resumeStatusText" class="text-yellow-400">检查中...</span>
+          </div>
+          <div class="flex gap-3">
+            <label class="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg font-semibold transition-colors cursor-pointer">
+              上传简历
+              <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" class="hidden">
+            </label>
+            <button id="deleteResumeBtn" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors hidden">删除简历</button>
+            <a id="previewResumeBtn" href="#" target="_blank" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors hidden">预览简历</a>
+          </div>
+        </div>
+        <p class="text-neutral-500 text-sm mt-3">上传后，首页的"下载简历"按钮将可用。支持 PDF、DOC、DOCX 格式。</p>
+      </div>
+
       <!-- Projects List -->
       <div id="projectsList" class="grid gap-4"></div>
 
@@ -60,13 +80,18 @@
               </div>
               <div>
                 <label class="block text-sm text-neutral-400 mb-2">分类 *</label>
-                <select id="category" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
-                  <option value="B端系统">B端系统</option>
-                  <option value="移动应用">移动应用</option>
-                  <option value="数据可视化">数据可视化</option>
-                  <option value="运营设计">运营设计</option>
-                  <option value="IP周边">IP周边</option>
-                </select>
+                <div class="flex gap-2">
+                  <select id="categorySelect" class="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+                    <option value="">-- 选择或自定义 --</option>
+                    <option value="B端系统 / APP">B端系统 / APP</option>
+                    <option value="数据可视化">数据可视化</option>
+                    <option value="品牌 / 平面">品牌 / 平面</option>
+                    <option value="运营设计">运营设计</option>
+                    <option value="IP周边">IP周边</option>
+                    <option value="移动应用">移动应用</option>
+                  </select>
+                  <input type="text" id="category" required placeholder="自定义分类" class="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-indigo-500">
+                </div>
               </div>
             </div>
             <div>
@@ -142,6 +167,7 @@
     function showAdmin() {
       loginSection.classList.add('hidden');
       adminSection.classList.remove('hidden');
+      loadResumeStatus();
     }
 
     // Login
@@ -222,6 +248,7 @@
       projectForm.reset();
       document.getElementById('projectId').value = '';
       document.getElementById('currentImage').classList.add('hidden');
+      document.getElementById('categorySelect').value = '';
     }
 
     document.getElementById('addBtn').addEventListener('click', () => openModal('添加作品'));
@@ -239,6 +266,10 @@
         document.getElementById('projectId').value = project.id;
         document.getElementById('title').value = project.title;
         document.getElementById('category').value = project.category;
+        // 同步下拉框
+        const catSelect = document.getElementById('categorySelect');
+        const matchOpt = Array.from(catSelect.options).find(opt => opt.value === project.category);
+        catSelect.value = matchOpt ? matchOpt.value : '';
         document.getElementById('description').value = project.description || '';
         document.getElementById('tags').value = (project.tags || []).join(', ');
         document.getElementById('sort_order').value = project.sort_order || 0;
@@ -304,6 +335,105 @@
       } catch (error) {
         console.error(error);
       }
+    });
+
+    // ========== 简历管理 ==========
+    const resumeFile = document.getElementById('resumeFile');
+    const resumeStatusText = document.getElementById('resumeStatusText');
+    const deleteResumeBtn = document.getElementById('deleteResumeBtn');
+    const previewResumeBtn = document.getElementById('previewResumeBtn');
+
+    async function loadResumeStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/resume`);
+        const data = await res.json();
+        if (data.exists) {
+          resumeStatusText.textContent = '已上传';
+          resumeStatusText.className = 'text-green-400';
+          deleteResumeBtn.classList.remove('hidden');
+          previewResumeBtn.classList.remove('hidden');
+          previewResumeBtn.href = data.path;
+        } else {
+          resumeStatusText.textContent = '未上传';
+          resumeStatusText.className = 'text-yellow-400';
+          deleteResumeBtn.classList.add('hidden');
+          previewResumeBtn.classList.add('hidden');
+        }
+      } catch (error) {
+        resumeStatusText.textContent = '检查失败';
+        resumeStatusText.className = 'text-red-400';
+      }
+    }
+
+    resumeFile.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const ext = file.name.toLowerCase();
+      if (!ext.endsWith('.pdf') && !ext.endsWith('.doc') && !ext.endsWith('.docx')) {
+        alert('只支持 PDF 和 Word 格式');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      try {
+        resumeStatusText.textContent = '上传中...';
+        resumeStatusText.className = 'text-blue-400';
+
+        const res = await fetch(`${API_BASE}/resume`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+
+        if (res.ok) {
+          alert('简历上传成功！');
+          loadResumeStatus();
+        } else {
+          const data = await res.json();
+          alert(data.error || '上传失败');
+          loadResumeStatus();
+        }
+      } catch (error) {
+        alert('上传失败');
+        loadResumeStatus();
+      }
+      resumeFile.value = '';
+    });
+
+    deleteResumeBtn.addEventListener('click', async () => {
+      if (!confirm('确定要删除简历吗？')) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/resume`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          alert('简历已删除');
+          loadResumeStatus();
+        }
+      } catch (error) {
+        alert('删除失败');
+      }
+    });
+
+    // 分类选择联动
+    const categorySelect = document.getElementById('categorySelect');
+    const categoryInput = document.getElementById('category');
+
+    categorySelect.addEventListener('change', () => {
+      if (categorySelect.value) {
+        categoryInput.value = categorySelect.value;
+      }
+    });
+
+    categoryInput.addEventListener('input', () => {
+      // 如果手动输入，重置下拉框
+      const matchOption = Array.from(categorySelect.options).find(opt => opt.value === categoryInput.value);
+      categorySelect.value = matchOption ? matchOption.value : '';
     });
 
     // Init
