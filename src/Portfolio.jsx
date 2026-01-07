@@ -165,10 +165,10 @@ const Portfolio = () => {
 
   // 默认作品数据（API 未返回数据时使用）
   const defaultProjects = [
-    { title: "兴安云智能移动端", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "金融行业移动端解决方案", imageUrl: "/兴安云智能移动端.jpg" },
-    { title: "金智云鼎 APP", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "面向企业客户的业务管理端", imageUrl: "/金智云鼎APP.jpg" },
-    { title: "可视化大屏", category: "数据可视化", color: "from-blue-600 to-cyan-400", desc: "实时数据驾驶舱", imageUrl: "/可视化大屏.jpg" },
-    { title: "运营设计", category: "品牌 / 平面", color: "from-amber-400 to-orange-500", desc: "活动与转化目标的视觉物料", imageUrl: "/运营设计.jpg" },
+    { title: "兴安云智能移动端", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "金融行业移动端解决方案", imageUrl: "https://s2.loli.net/2026/01/07/u4zXbdlFrOJpeWv.jpg" },
+    { title: "金智云鼎 APP", category: "B端系统 / APP", color: "from-indigo-600 to-purple-500", desc: "面向企业客户的业务管理端", imageUrl: "https://s2.loli.net/2026/01/07/BZYHgkST8xoXCFV.jpg" },
+    { title: "可视化大屏", category: "数据可视化", color: "from-blue-600 to-cyan-400", desc: "实时数据驾驶舱", imageUrl: "https://s2.loli.net/2026/01/07/clMVZtEbjufaqTi.jpg" },
+    { title: "运营设计", category: "品牌 / 平面", color: "from-amber-400 to-orange-500", desc: "活动与转化目标的视觉物料", imageUrl: "https://s2.loli.net/2026/01/07/1yLBjnrei3RaFIf.jpg" },
   ];
 
   // 如果 API 没有返回数据，使用默认数据
@@ -240,7 +240,7 @@ const Portfolio = () => {
             />
           )}
           <div className="text-2xl font-bold tracking-tighter flex items-center gap-2">
-            <img src="/avatar.png" alt="logo" className="h-8 w-8 object-cover rounded-lg" />
+            <img src="https://s2.loli.net/2026/01/07/lEZVjNrO6odPnQI.png" alt="logo" className="h-8 w-8 object-cover rounded-lg" />
             <span>Selected Works<span className="text-indigo-500">.</span></span>
           </div>
           <div className="hidden md:flex gap-8 text-sm font-medium text-neutral-400">
@@ -295,7 +295,7 @@ const Portfolio = () => {
                 查看作品 <ChevronDown size={18} />
               </a>
               {resumePath ? (
-                <a href={resumePath} download="王越_UI视觉设计师_简历.pdf" className={`${isLight ? 'bg-transparent border border-neutral-300 text-neutral-900 hover:bg-neutral-50' : 'bg-transparent border border-white/20 text-white hover:bg-white/10'} px-8 py-3 rounded-full font-bold transition-colors flex items-center gap-2`}>
+                <a href={resumePath} download="王越-交互设计师简历" className={`${isLight ? 'bg-transparent border border-neutral-300 text-neutral-900 hover:bg-neutral-50' : 'bg-transparent border border-white/20 text-white hover:bg-white/10'} px-8 py-3 rounded-full font-bold transition-colors flex items-center gap-2`}>
                   下载简历 <Download size={18} />
                 </a>
               ) : (
@@ -320,7 +320,7 @@ const Portfolio = () => {
             <div className="relative z-10 w-full rounded-2xl overflow-hidden bg-neutral-900 border border-white/10 shadow-2xl group" style={{ aspectRatio: '454/550' }}>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 to-purple-900/40 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="absolute inset-0 flex items-center justify-center transform translate-y-4 group-hover:translate-y-2 transition-transform duration-500">
-                <img src="/TopImage.jpg" alt="Design Preview" className="w-[90%] h-[90%] object-fill rounded-xl shadow-2xl border border-white/10" />
+                <img src="https://s2.loli.net/2026/01/07/rhRGcfkSKHYI4b8.jpg" alt="Design Preview" className="w-[90%] h-[90%] object-fill rounded-xl shadow-2xl border border-white/10" />
               </div>
               <div className="absolute -right-4 top-20 bg-neutral-800/90 backdrop-blur-xl p-4 rounded-xl border border-white/10 shadow-xl transform rotate-3 group-hover:rotate-6 transition-transform">
                 <div className="flex items-center gap-3">
@@ -369,14 +369,14 @@ const Portfolio = () => {
               </div>
             </div>
             <div className={`rounded-2xl overflow-hidden border transition-colors relative ${surface}`} style={{ aspectRatio: '270/378' }}>
-              <img src="/cell1.jpg" alt="B端系统" className="w-full h-full object-cover" />
+              <img src="https://s2.loli.net/2026/01/07/wZ2xsWNY5Bkrqy1.jpg" alt="B端系统" className="w-full h-full object-cover" />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
                 <div className="text-4xl font-bold mb-1 text-white">100%</div>
                 <div className="text-white/80 text-sm">视觉包装和字体设计</div>
               </div>
             </div>
             <div className={`rounded-2xl overflow-hidden border transition-colors relative ${surface}`} style={{ aspectRatio: '270/378' }}>
-              <img src="/cell2.jpg" alt="视觉设计" className="w-full h-full object-cover" />
+              <img src="https://s2.loli.net/2026/01/07/fBTzhKiUXIxVwOb.jpg" alt="视觉设计" className="w-full h-full object-cover" />
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
                 <div className="text-4xl font-bold mb-1 text-white">10+</div>
                 <div className="text-white/80 text-sm">B端/SaaS系统项目交付</div>

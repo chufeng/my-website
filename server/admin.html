@@ -61,7 +61,7 @@
             <a id="previewResumeBtn" href="#" target="_blank" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors hidden">预览简历</a>
           </div>
         </div>
-        <p class="text-neutral-500 text-sm mt-3">上传后，首页的"下载简历"按钮将可用。支持 PDF、DOC、DOCX 格式。</p>
+        <p class="text-neutral-500 text-sm mt-3">上传后，首页的"下载简历"按钮将可用。支持 PDF、DOC、DOCX 格式（仅 PDF 可在线预览）。</p>
       </div>
 
       <!-- Projects List -->
@@ -348,11 +348,17 @@
         const res = await fetch(`${API_BASE}/resume`);
         const data = await res.json();
         if (data.exists) {
-          resumeStatusText.textContent = '已上传';
+          const isPdf = data.path.toLowerCase().endsWith('.pdf');
+          const fileType = isPdf ? 'PDF' : 'Word文档';
+          resumeStatusText.textContent = `已上传 (${fileType})`;
           resumeStatusText.className = 'text-green-400';
           deleteResumeBtn.classList.remove('hidden');
-          previewResumeBtn.classList.remove('hidden');
-          previewResumeBtn.href = data.path;
+          if (isPdf) {
+            previewResumeBtn.classList.remove('hidden');
+            previewResumeBtn.href = data.path;
+          } else {
+            previewResumeBtn.classList.add('hidden');
+          }
         } else {
           resumeStatusText.textContent = '未上传';
           resumeStatusText.className = 'text-yellow-400';

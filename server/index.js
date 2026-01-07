@@ -10,6 +10,41 @@ const jwt = require('jsonwebtoken');
 const app = express();
 const PORT = 3001;
 const JWT_SECRET = 'your-secret-key-change-in-production';
+const SMMS_TOKEN = '5OPYbt0fkEgaPFeuNaHijAySU78FJzd5';
+
+// 上传图片到 sm.ms 图床
+async function uploadToSmms(filePath) {
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    const fileName = path.basename(filePath);
+    const blob = new Blob([fileBuffer]);
+
+    const formData = new FormData();
+    formData.append('smfile', blob, fileName);
+
+    const res = await fetch('https://sm.ms/api/v2/upload', {
+      method: 'POST',
+      headers: { 'Authorization': SMMS_TOKEN },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      console.log(`图片上传到 sm.ms 成功: ${data.data.url}`);
+      return data.data.url;
+    } else if (data.code === 'image_repeated') {
+      console.log(`图片已存在于 sm.ms: ${data.images}`);
+      return data.images;
+    } else {
+      console.log(`图片上传到 sm.ms 失败: ${data.message}`);
+      return null;
+    }
+  } catch (error) {
+    console.log(`上传到 sm.ms 出错: ${error.message}`);
+    return null;
+  }
+}
 
 // 确保上传目录存在
 const uploadDir = path.join(__dirname, 'uploads');
@@ -206,11 +241,24 @@ app.get('/api/verify', authenticateToken, (req, res) => {
 });
 
 // 创建作品
-app.post('/api/projects', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/projects', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { title, category, description, tags, link, sort_order, image_path } = req.body;
-    // 优先使用上传的文件，其次使用传入的路径
-    const image = req.file ? `/uploads/${req.file.filename}` : (image_path || null);
+    let image = image_path || null;
+
+    // 如果上传了图片文件，先转存到 sm.ms
+    if (req.file) {
+      const localPath = path.join(uploadDir, req.file.filename);
+      const cdnUrl = await uploadToSmms(localPath);
+      if (cdnUrl) {
+        image = cdnUrl;
+        // 删除本地临时文件
+        fs.unlinkSync(localPath);
+      } else {
+        // 如果上传到 sm.ms 失败，使用本地路径
+        image = `/uploads/${req.file.filename}`;
+      }
+    }
 
     db.run(
       `INSERT INTO projects (title, category, description, image, tags, link, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -219,14 +267,14 @@ app.post('/api/projects', authenticateToken, upload.single('image'), (req, res) 
     saveDb();
 
     const lastId = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
-    res.json({ id: lastId, message: 'Project created' });
+    res.json({ id: lastId, message: 'Project created', image });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // 更新作品
-app.put('/api/projects/:id', authenticateToken, upload.single('image'), (req, res) => {
+app.put('/api/projects/:id', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { title, category, description, tags, link, sort_order, image_path } = req.body;
     const project = queryOne('SELECT * FROM projects WHERE id = ?', [req.params.id]);
@@ -237,12 +285,23 @@ app.put('/api/projects/:id', authenticateToken, upload.single('image'), (req, re
 
     let image = project.image;
     if (req.file) {
-      // 删除旧图片
+      // 删除旧的本地图片（如果有）
       if (project.image && project.image.startsWith('/uploads/')) {
         const oldPath = path.join(__dirname, project.image);
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
-      image = `/uploads/${req.file.filename}`;
+
+      // 上传新图片到 sm.ms
+      const localPath = path.join(uploadDir, req.file.filename);
+      const cdnUrl = await uploadToSmms(localPath);
+      if (cdnUrl) {
+        image = cdnUrl;
+        // 删除本地临时文件
+        fs.unlinkSync(localPath);
+      } else {
+        // 如果上传到 sm.ms 失败，使用本地路径
+        image = `/uploads/${req.file.filename}`;
+      }
     } else if (image_path) {
       // 使用传入的图片路径
       image = image_path;
@@ -254,7 +313,7 @@ app.put('/api/projects/:id', authenticateToken, upload.single('image'), (req, re
     );
     saveDb();
 
-    res.json({ message: 'Project updated' });
+    res.json({ message: 'Project updated', image });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
