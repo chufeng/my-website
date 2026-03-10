@@ -273,6 +273,23 @@ app.post('/api/projects', authenticateToken, upload.single('image'), async (req,
   }
 });
 
+// 批量更新排序（必须在 :id 路由之前）
+app.put('/api/projects/reorder', authenticateToken, (req, res) => {
+  try {
+    const { orders } = req.body;
+    if (!Array.isArray(orders)) {
+      return res.status(400).json({ error: 'orders must be an array' });
+    }
+    for (const item of orders) {
+      db.run('UPDATE projects SET sort_order = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [item.sort_order, item.id]);
+    }
+    saveDb();
+    res.json({ message: 'Reorder successful' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 更新作品
 app.put('/api/projects/:id', authenticateToken, upload.single('image'), async (req, res) => {
   try {
@@ -314,23 +331,6 @@ app.put('/api/projects/:id', authenticateToken, upload.single('image'), async (r
     saveDb();
 
     res.json({ message: 'Project updated', image });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// 批量更新排序
-app.put('/api/projects/reorder', authenticateToken, (req, res) => {
-  try {
-    const { orders } = req.body;
-    if (!Array.isArray(orders)) {
-      return res.status(400).json({ error: 'orders must be an array' });
-    }
-    for (const item of orders) {
-      db.run('UPDATE projects SET sort_order = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [item.sort_order, item.id]);
-    }
-    saveDb();
-    res.json({ message: 'Reorder successful' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
