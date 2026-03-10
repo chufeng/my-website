@@ -11,6 +11,71 @@
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      transition: width 0.2s ease;
+    }
+    .btn-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .drag-handle {
+      cursor: grab;
+      user-select: none;
+      font-size: 1.25rem;
+      color: rgba(255,255,255,0.3);
+      transition: color 0.2s;
+    }
+    .drag-handle:hover {
+      color: rgba(255,255,255,0.7);
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .dragging {
+      opacity: 0.4;
+    }
+    .drag-over-top {
+      border-top: 2px solid #6366f1 !important;
+    }
+    .drag-over-bottom {
+      border-bottom: 2px solid #6366f1 !important;
+    }
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .progress-bar-fill.indeterminate {
+      width: 100% !important;
+      background: repeating-linear-gradient(
+        -45deg,
+        #6366f1,
+        #6366f1 10px,
+        #818cf8 10px,
+        #818cf8 20px
+      );
+      background-size: 28px 100%;
+      animation: barberpole 0.6s linear infinite;
+    }
+    @keyframes barberpole {
+      to { background-position: 28px 0; }
+    }
   </style>
 </head>
 <body class="bg-neutral-900 text-white min-h-screen">
@@ -59,6 +124,15 @@
             </label>
             <button id="deleteResumeBtn" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-4 py-2 rounded-lg transition-colors hidden">删除简历</button>
             <a id="previewResumeBtn" href="#" target="_blank" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors hidden">预览简历</a>
+          </div>
+        </div>
+        <div id="resumeProgress" class="mt-4 hidden">
+          <div class="flex justify-between text-sm text-neutral-400 mb-1">
+            <span>上传中...</span>
+            <span id="resumeProgressText">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="resumeProgressBar" class="progress-bar-fill" style="width: 0%"></div>
           </div>
         </div>
         <p class="text-neutral-500 text-sm mt-3">上传后，首页的"下载简历"按钮将可用。支持 PDF、DOC、DOCX 格式（仅 PDF 可在线预览）。</p>
@@ -119,8 +193,17 @@
                 <img id="previewImage" class="h-32 rounded-lg object-cover">
               </div>
             </div>
+            <div id="projectProgress" class="hidden">
+              <div class="flex justify-between text-sm text-neutral-400 mb-1">
+                <span>上传中...</span>
+                <span id="projectProgressText">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div id="projectProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+              </div>
+            </div>
             <div class="flex gap-4 pt-4">
-              <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-semibold transition-colors">保存</button>
+              <button type="submit" id="projectSaveBtn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-semibold transition-colors">保存</button>
               <button type="button" id="cancelBtn" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-lg transition-colors">取消</button>
             </div>
           </form>
@@ -212,7 +295,8 @@
         const projects = await res.json();
 
         projectsList.innerHTML = projects.map(p => `
-          <div class="glass rounded-xl p-6 flex gap-6 items-center">
+          <div class="glass rounded-xl p-6 flex gap-6 items-center project-card" draggable="true" data-id="${p.id}">
+            <span class="drag-handle" title="拖拽排序">☰</span>
             <img src="${p.image || 'https://via.placeholder.com/120'}" class="w-24 h-24 rounded-lg object-cover shrink-0">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3 mb-2">
@@ -230,6 +314,7 @@
             </div>
           </div>
         `).join('');
+        initDragAndDrop();
       } catch (error) {
         console.error(error);
       }
@@ -302,7 +387,12 @@
     }
 
     // Save project
-    projectForm.addEventListener('submit', async (e) => {
+    const projectSaveBtn = document.getElementById('projectSaveBtn');
+    const projectProgressEl = document.getElementById('projectProgress');
+    const projectProgressBarEl = document.getElementById('projectProgressBar');
+    const projectProgressTextEl = document.getElementById('projectProgressText');
+
+    projectForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
       const id = document.getElementById('projectId').value;
@@ -320,21 +410,57 @@
         formData.append('image', imageFile);
       }
 
-      try {
-        const url = id ? `${API_BASE}/projects/${id}` : `${API_BASE}/projects`;
-        const method = id ? 'PUT' : 'POST';
+      const url = id ? `${API_BASE}/projects/${id}` : `${API_BASE}/projects`;
+      const method = id ? 'PUT' : 'POST';
 
-        await fetch(url, {
-          method,
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
+      // Show progress, disable button
+      projectSaveBtn.classList.add('btn-disabled');
+      projectSaveBtn.innerHTML = '<span class="spinner"></span> 保存中...';
+      projectProgressEl.classList.remove('hidden');
+      projectProgressBarEl.style.width = '0%';
+      projectProgressTextEl.textContent = '0%';
 
-        closeModal();
-        loadProjects();
-      } catch (error) {
-        console.error(error);
-      }
+      const hasImage = !!document.getElementById('image').files[0];
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', (ev) => {
+        if (ev.lengthComputable) {
+          const pct = Math.round((ev.loaded / ev.total) * 100);
+          projectProgressBarEl.style.width = pct + '%';
+          projectProgressTextEl.textContent = pct + '%';
+        }
+      });
+      xhr.upload.addEventListener('load', () => {
+        if (hasImage) {
+          projectProgressBarEl.classList.add('indeterminate');
+          projectProgressTextEl.textContent = '图床转存中...';
+        }
+      });
+      xhr.addEventListener('load', () => {
+        projectProgressBarEl.classList.remove('indeterminate');
+        projectProgressBarEl.style.width = '100%';
+        projectProgressTextEl.textContent = '100%';
+        setTimeout(() => {
+          projectProgressEl.classList.add('hidden');
+          projectSaveBtn.classList.remove('btn-disabled');
+          projectSaveBtn.innerHTML = '保存';
+          if (xhr.status >= 200 && xhr.status < 300) {
+            closeModal();
+            loadProjects();
+          } else {
+            try { alert(JSON.parse(xhr.responseText).error || '保存失败'); } catch { alert('保存失败'); }
+          }
+        }, 500);
+      });
+      xhr.addEventListener('error', () => {
+        projectProgressEl.classList.add('hidden');
+        projectSaveBtn.classList.remove('btn-disabled');
+        projectSaveBtn.innerHTML = '保存';
+        alert('保存失败');
+      });
+
+      xhr.open(method, url);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.send(formData);
     });
 
     // ========== 简历管理 ==========
@@ -371,41 +497,71 @@
       }
     }
 
-    resumeFile.addEventListener('change', async (e) => {
+    const resumeUploadLabel = resumeFile.closest('label');
+    const resumeProgressEl = document.getElementById('resumeProgress');
+    const resumeProgressBar = document.getElementById('resumeProgressBar');
+    const resumeProgressText = document.getElementById('resumeProgressText');
+
+    resumeFile.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const ext = file.name.toLowerCase();
       if (!ext.endsWith('.pdf') && !ext.endsWith('.doc') && !ext.endsWith('.docx')) {
         alert('只支持 PDF 和 Word 格式');
+        resumeFile.value = '';
         return;
       }
 
       const formData = new FormData();
       formData.append('resume', file);
 
-      try {
-        resumeStatusText.textContent = '上传中...';
-        resumeStatusText.className = 'text-blue-400';
+      // Show progress, disable button
+      resumeUploadLabel.classList.add('btn-disabled');
+      resumeProgressEl.classList.remove('hidden');
+      resumeProgressBar.style.width = '0%';
+      resumeProgressText.textContent = '0%';
+      resumeStatusText.textContent = '上传中...';
+      resumeStatusText.className = 'text-blue-400';
 
-        const res = await fetch(`${API_BASE}/resume`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-
-        if (res.ok) {
-          alert('简历上传成功！');
-          loadResumeStatus();
-        } else {
-          const data = await res.json();
-          alert(data.error || '上传失败');
-          loadResumeStatus();
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', (ev) => {
+        if (ev.lengthComputable) {
+          const pct = Math.round((ev.loaded / ev.total) * 100);
+          resumeProgressBar.style.width = pct + '%';
+          resumeProgressText.textContent = pct + '%';
         }
-      } catch (error) {
+      });
+      xhr.upload.addEventListener('load', () => {
+        resumeProgressBar.classList.add('indeterminate');
+        resumeProgressText.textContent = '服务器处理中...';
+        resumeStatusText.textContent = '处理中...';
+      });
+      xhr.addEventListener('load', () => {
+        resumeProgressBar.classList.remove('indeterminate');
+        resumeProgressBar.style.width = '100%';
+        resumeProgressText.textContent = '100%';
+        setTimeout(() => {
+          resumeProgressEl.classList.add('hidden');
+          resumeUploadLabel.classList.remove('btn-disabled');
+          if (xhr.status >= 200 && xhr.status < 300) {
+            alert('简历上传成功！');
+          } else {
+            try { alert(JSON.parse(xhr.responseText).error || '上传失败'); } catch { alert('上传失败'); }
+          }
+          loadResumeStatus();
+        }, 500);
+      });
+      xhr.addEventListener('error', () => {
+        resumeProgressEl.classList.add('hidden');
+        resumeUploadLabel.classList.remove('btn-disabled');
         alert('上传失败');
         loadResumeStatus();
-      }
+      });
+
+      xhr.open('POST', `${API_BASE}/resume`);
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      xhr.send(formData);
       resumeFile.value = '';
     });
 
@@ -441,6 +597,159 @@
       const matchOption = Array.from(categorySelect.options).find(opt => opt.value === categoryInput.value);
       categorySelect.value = matchOption ? matchOption.value : '';
     });
+
+    // ========== 拖拽排序 ==========
+    let draggedEl = null;
+
+    function initDragAndDrop() {
+      const cards = projectsList.querySelectorAll('.project-card');
+
+      cards.forEach(card => {
+        // Desktop drag events
+        card.addEventListener('dragstart', (e) => {
+          draggedEl = card;
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          clearIndicators();
+          if (draggedEl) {
+            saveNewOrder();
+            draggedEl = null;
+          }
+        });
+
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (card === draggedEl) return;
+          clearIndicators();
+          const rect = card.getBoundingClientRect();
+          const midY = rect.top + rect.height / 2;
+          if (e.clientY < midY) {
+            card.classList.add('drag-over-top');
+          } else {
+            card.classList.add('drag-over-bottom');
+          }
+        });
+
+        card.addEventListener('dragleave', () => {
+          card.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (card === draggedEl || !draggedEl) return;
+          const rect = card.getBoundingClientRect();
+          const midY = rect.top + rect.height / 2;
+          if (e.clientY < midY) {
+            projectsList.insertBefore(draggedEl, card);
+          } else {
+            projectsList.insertBefore(draggedEl, card.nextSibling);
+          }
+          clearIndicators();
+        });
+
+        // Touch events for mobile
+        let touchStartY = 0;
+        let touchClone = null;
+        let longPressTimer = null;
+        let isDragging = false;
+
+        card.addEventListener('touchstart', (e) => {
+          const handle = e.target.closest('.drag-handle');
+          if (!handle) return;
+          e.preventDefault();
+          longPressTimer = setTimeout(() => {
+            isDragging = true;
+            draggedEl = card;
+            card.classList.add('dragging');
+            touchStartY = e.touches[0].clientY;
+          }, 300);
+        }, { passive: false });
+
+        card.addEventListener('touchmove', (e) => {
+          if (!isDragging || !draggedEl) {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            return;
+          }
+          e.preventDefault();
+          const touchY = e.touches[0].clientY;
+          clearIndicators();
+          const allCards = [...projectsList.querySelectorAll('.project-card')];
+          for (const c of allCards) {
+            if (c === draggedEl) continue;
+            const rect = c.getBoundingClientRect();
+            if (touchY >= rect.top && touchY <= rect.bottom) {
+              const midY = rect.top + rect.height / 2;
+              if (touchY < midY) {
+                c.classList.add('drag-over-top');
+              } else {
+                c.classList.add('drag-over-bottom');
+              }
+              break;
+            }
+          }
+        }, { passive: false });
+
+        card.addEventListener('touchend', (e) => {
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+          if (!isDragging || !draggedEl) return;
+          isDragging = false;
+          card.classList.remove('dragging');
+
+          const touchY = e.changedTouches[0].clientY;
+          const allCards = [...projectsList.querySelectorAll('.project-card')];
+          for (const c of allCards) {
+            if (c === draggedEl) continue;
+            const rect = c.getBoundingClientRect();
+            if (touchY >= rect.top && touchY <= rect.bottom) {
+              const midY = rect.top + rect.height / 2;
+              if (touchY < midY) {
+                projectsList.insertBefore(draggedEl, c);
+              } else {
+                projectsList.insertBefore(draggedEl, c.nextSibling);
+              }
+              break;
+            }
+          }
+          clearIndicators();
+          saveNewOrder();
+          draggedEl = null;
+        });
+      });
+    }
+
+    function clearIndicators() {
+      projectsList.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => {
+        el.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+    }
+
+    async function saveNewOrder() {
+      const cards = projectsList.querySelectorAll('.project-card');
+      const orders = [...cards].map((card, index) => ({
+        id: parseInt(card.dataset.id),
+        sort_order: index + 1
+      }));
+
+      try {
+        await fetch(`${API_BASE}/projects/reorder`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ orders })
+        });
+      } catch (error) {
+        console.error('排序保存失败:', error);
+        alert('排序保存失败，请重试');
+        loadProjects();
+      }
+    }
 
     // Init
     checkAuth();
