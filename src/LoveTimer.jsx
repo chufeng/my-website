@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarHeart, Clock3, Sparkles } from 'lucide-react';
-import gardenBackground from './assets/generated/love-clock-garden-bg.png';
+import gardenBackground from './assets/generated/love-clock-garden-bg.jpeg';
 import './LoveTimer.css';
 
 const START_DATE = new Date('2021-09-03T00:00:00+08:00');
