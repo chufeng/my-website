@@ -250,7 +250,13 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <script>
-    const API_BASE = '/api';
+    const BASE_PATH = '/jianli/';
+    const API_BASE = `${BASE_PATH}api`;
+    const resolveAssetPath = (value) => {
+      if (!value) return value;
+      if (/^https?:\/\//i.test(value)) return value;
+      return value.startsWith('/') ? `${BASE_PATH}${value.slice(1)}` : value;
+    };
     let token = localStorage.getItem('token');
 
     function showToast(message, type = 'error', duration = 4000) {
@@ -354,7 +360,7 @@
         projectsList.innerHTML = projects.map(p => `
           <div class="glass rounded-xl p-6 flex gap-6 items-center project-card" draggable="true" data-id="${p.id}">
             <span class="drag-handle" title="拖拽排序">☰</span>
-            <img src="${p.image || 'https://via.placeholder.com/120'}" class="w-24 h-24 rounded-lg object-cover shrink-0">
+            <img src="${resolveAssetPath(p.image) || 'https://via.placeholder.com/120'}" class="w-24 h-24 rounded-lg object-cover shrink-0">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3 mb-2">
                 <h3 class="font-bold text-lg">${p.title}</h3>
@@ -539,7 +545,7 @@
           deleteResumeBtn.classList.remove('hidden');
           if (isPdf) {
             previewResumeBtn.classList.remove('hidden');
-            previewResumeBtn.href = data.path;
+            previewResumeBtn.href = resolveAssetPath(data.path);
           } else {
             previewResumeBtn.classList.add('hidden');
           }

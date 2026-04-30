@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 
 .claude/
+
+# Local secrets and private keys
+.secrets/
+
+# Local server backups
+.server-backups/
+
+# Local deployment staging
+.deploy-staging/

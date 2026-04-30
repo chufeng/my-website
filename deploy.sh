@@ -2,8 +2,10 @@
 
 # 完整部署脚本 - 前端 + 后端
 
-SERVER="root@106.54.34.190"
-REMOTE_FRONTEND="/usr/share/nginx/html/"
+SSH_KEY="$(cd "$(dirname "$0")" && pwd)/.secrets/ssh/京东云控制台 codex_te.pem"
+SERVER="root@36.151.143.238"
+SSH_OPTS="-i \"$SSH_KEY\" -o StrictHostKeyChecking=accept-new"
+REMOTE_FRONTEND="/usr/share/nginx/html/jianli/"
 REMOTE_BACKEND="/opt/portfolio-server/"
 
 echo "========================================"
@@ -38,12 +40,12 @@ deploy_frontend() {
     fi
 
     echo "📦 上传前端文件到服务器..."
-    rsync -avz --delete ./dist/ "$SERVER:$REMOTE_FRONTEND"
+    rsync -avz --delete -e "ssh -i \"$SSH_KEY\" -o StrictHostKeyChecking=accept-new" ./dist/ "$SERVER:$REMOTE_FRONTEND"
 
     if [ $? -eq 0 ]; then
         if [ "$fix_perms" = true ]; then
             echo "🔧 修复服务器文件权限..."
-            ssh "$SERVER" "chmod -R 755 $REMOTE_FRONTEND && find $REMOTE_FRONTEND -type f -exec chmod 644 {} \;"
+            ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SERVER" "chmod -R 755 $REMOTE_FRONTEND && find $REMOTE_FRONTEND -type f -exec chmod 644 {} \;"
         else
             echo "⏭️  跳过权限修复"
         fi
@@ -57,10 +59,10 @@ deploy_frontend() {
 deploy_backend() {
     echo ""
     echo "📦 上传后端文件到服务器..."
-    rsync -avz --exclude 'node_modules' --exclude 'uploads' --exclude '*.db' ./server/ "$SERVER:$REMOTE_BACKEND"
+    rsync -avz --exclude 'node_modules' --exclude 'uploads' --exclude '*.db' -e "ssh -i \"$SSH_KEY\" -o StrictHostKeyChecking=accept-new" ./server/ "$SERVER:$REMOTE_BACKEND"
 
     echo "📥 在服务器上安装依赖并重启服务..."
-    ssh "$SERVER" "cd $REMOTE_BACKEND && npm install --production && pm2 restart portfolio-api || pm2 start index.js --name portfolio-api"
+    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SERVER" "cd $REMOTE_BACKEND && npm install --production && pm2 restart portfolio-api || pm2 start index.js --name portfolio-api"
 
     if [ $? -eq 0 ]; then
         echo "✅ 后端部署成功！"
@@ -74,7 +76,7 @@ init_server() {
     echo ""
     echo "🔧 初始化服务器..."
 
-    ssh "$SERVER" << 'EOF'
+    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SERVER" << 'EOF'
         # 安装 Node.js (如果没有)
         if ! command -v node &> /dev/null; then
             curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
@@ -100,7 +102,7 @@ fix_server_permissions() {
     echo ""
     echo "🔧 修复服务器文件权限..."
     echo "   （当图片或资源文件出现 403 Forbidden 错误时使用此选项）"
-    ssh "$SERVER" "chmod -R 755 $REMOTE_FRONTEND && find $REMOTE_FRONTEND -type f -exec chmod 644 {} \;"
+    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new "$SERVER" "chmod -R 755 $REMOTE_FRONTEND && find $REMOTE_FRONTEND -type f -exec chmod 644 {} \;"
     if [ $? -eq 0 ]; then
         echo "✅ 权限修复完成！"
     else
@@ -148,7 +150,8 @@ esac
 
 echo ""
 echo "========================================"
-echo "🌐 网站地址: http://106.54.34.190/"
-echo "🔧 管理后台: http://106.54.34.190/admin"
+echo "🌐 网站地址: http://36.151.143.238/jianli/"
+echo "💌 Love 页面: http://36.151.143.238/love"
+echo "🔧 管理后台: http://36.151.143.238/jianli/admin"
 echo "   默认账号: admin / admin123"
 echo "========================================"

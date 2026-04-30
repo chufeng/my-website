@@ -27,8 +27,15 @@ import {
   Star
 } from 'lucide-react';
 
-// API 配置 - 生产环境改成你的服务器地址
-const API_BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+// API 配置
+const BASE_PATH = import.meta.env.PROD ? import.meta.env.BASE_URL : '/';
+const API_BASE = import.meta.env.PROD ? `${BASE_PATH}api` : 'http://localhost:3001/api';
+
+const resolveAssetPath = (value) => {
+  if (!value) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  return value.startsWith('/') ? `${BASE_PATH}${value.slice(1)}` : value;
+};
 
 const Portfolio = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -70,7 +77,7 @@ const Portfolio = () => {
             category: p.category,
             color: getCategoryColor(p.category),
             desc: p.description,
-            imageUrl: p.image
+            imageUrl: resolveAssetPath(p.image)
           }));
           setProjects(formattedProjects);
         }
@@ -89,7 +96,7 @@ const Portfolio = () => {
         if (res.ok) {
           const data = await res.json();
           if (data.exists) {
-            setResumePath(data.path);
+            setResumePath(resolveAssetPath(data.path));
           }
         }
       } catch (error) {
