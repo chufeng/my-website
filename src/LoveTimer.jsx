@@ -195,8 +195,8 @@ const LoveTimer = () => {
         <div className="love-copy">
           <p className="love-kicker"><Sparkles size={18} /> 2021.09.03</p>
           <h1>
-            <span>love</span>
-            <span>forever</span>
+            <span>樱花落满</span>
+            <span>我们的时间</span>
           </h1>
           <p className="love-subtitle">
             从偶像大师灰姑娘女孩星光舞台开始，我们把相遇后的每一天都悄悄记在夜色里。
