@@ -33,3 +33,13 @@ dist-ssr
 
 # Local deployment staging
 .deploy-staging/
+
+# Agent scratch dirs
+.codex-tmp/
+.tmp/
+
+# Local downloads / archives
+downloads/
+
+# Vendored external project (separate git repo)
+new-api/
