@@ -43,3 +43,8 @@ downloads/
 
 # Vendored external project (separate git repo)
 new-api/
+
+# Infinite Canvas sync: keep raw/private exports out of GitHub.
+canvas-sync/raw/
+canvas-sync/private/
+canvas-sync/*-with-secrets.json
