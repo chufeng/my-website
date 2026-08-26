@@ -2,6 +2,10 @@
 
 This workspace is for the website and VPS services under `/Users/chufeng/Documents/网站`.
 
+## Infinite Canvas Sync
+
+When working with Infinite Canvas, read `skills/infinite-canvas-sync/SKILL.md` first. Canvas data is browser-local IndexedDB; only reviewed `canvas-sync/exports/*.safe.json` files may be committed. Keep API Keys, Connect tokens, WebDAV credentials, raw exports, browser data, databases, uploads, and local settings out of GitHub. New computers must import a safe export, start `npx -y @basketikun/canvas-agent`, connect the local Agent, and configure their own API Key.
+
 ## VPS Access
 
 Primary new server:

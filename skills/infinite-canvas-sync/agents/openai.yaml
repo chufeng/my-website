@@ -1,0 +1,4 @@
+interface:
+  display_name: "Infinite Canvas Sync"
+  short_description: "安全导出、导入并同步 Infinite Canvas 画布"
+  default_prompt: "配置当前电脑的 Infinite Canvas 跨电脑同步，导入安全画布导出并检查本机 Agent 与 API 设置。"
