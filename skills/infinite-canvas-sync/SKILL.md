@@ -44,3 +44,10 @@ For large media or frequent sync, configure WebDAV in “配置 → WebDAV”. W
 - Never read or upload IndexedDB files, browser profiles, cookies, API Keys, Connect tokens, authorization headers, passwords, or WebDAV credentials.
 - Never claim a canvas is synced until a `.safe.json` exists in the repository and its commit is pushed.
 - If an export fails, report the exact visible error and stop before committing an empty or fabricated export.
+
+## Image generation lessons learned
+
+- The known working route was the image workbench calling `/v1/images/generations` with model `gpt-image-2`. Use one image per request; do not use `gpt-image-2-super`, `gpt-image-2-4k`, or Grok variants unless the user explicitly asks.
+- For canvas generation, run one node at a time and poll its status before starting another request. A successful workbench request does not prove that reference-image editing in the canvas will work.
+- Current canvas test: a fresh single-image `gpt-image-2` flow (`2:3`, `medium`, one wedding-photo reference) ended with `生成失败`; earlier retries also returned `Failed to fetch` or `页面刷新后生成已中断，请重新生成。` Do not repeat the request automatically because each attempt may incur a charge.
+- If the canvas edit route fails, report the node ID and visible error, then ask the user to verify the provider's image-edit endpoint/configuration before another paid attempt.
